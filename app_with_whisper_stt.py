@@ -1,5 +1,4 @@
 import os
-import re
 import tempfile
 import wave
 import threading
@@ -289,6 +288,34 @@ def response(
     yield AdditionalOutputs(chatbot)
 
 
+def on_stream_startup(stream_args):
+    """Function called when the audio stream starts up"""
+    print("\n\n***** AUDIO STREAM STARTED *****\n\n")
+    print("Voice chat is ready! You can start speaking now.")
+    print(f"Stream arguments: {stream_args}")
+    
+    # You can perform any initialization here that should happen when the stream starts
+    # For example, reset the TTS speaking flag to ensure it starts in the correct state
+    with tts_lock:
+        global is_tts_speaking
+        is_tts_speaking = False
+    
+    # Return a generator that yields the data
+    # This is required by ReplyOnPause
+    startup_data = {"stream_started_at": time.time()}
+    
+    # Create a generator that yields nothing but stores the data
+    def startup_generator():
+        # Store the startup data for later use
+        on_stream_startup.data = startup_data
+        # Yield nothing - this is just to make it a generator
+        if False:
+            yield
+            
+    # Return the generator
+    return startup_generator()
+
+
 def create_app():
     """
     Create and configure the Gradio UI and FastAPI app.
@@ -307,13 +334,13 @@ def create_app():
                 started_talking_threshold=0.9, 
                 speech_threshold=0.85,         
             ),
+            startup_fn=on_stream_startup,
         ),
         additional_outputs_handler=lambda a, b: b,
         additional_inputs=[chatbot],
         additional_outputs=[chatbot],
         concurrency_limit=5,
         ui_args={"title": "Ai chat 🤖"},
-        
     )
     
     # Store the stream instance globally
