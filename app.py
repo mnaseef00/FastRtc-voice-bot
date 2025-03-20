@@ -307,7 +307,7 @@ def response(
     # Add system message to instruct the model to keep responses short and simple
     system_message = {
         "role": "system", 
-        "content": "You are a helpful kind assistant."
+        "content": "You are a friendly and kind assistant. You greet people and use simple, short words."
     }
     
     # Add the temporary "thinking" message
