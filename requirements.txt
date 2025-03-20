@@ -1,0 +1,6 @@
+fastrtc
+fastrtc[vad]
+python-dotenv
+openai
+kokoro
+deepgram-sdk
